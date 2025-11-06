@@ -32,6 +32,7 @@
         stripe
         border
       >
+        <el-table-column prop="booking_no" label="申请编号" width="160" />
         <el-table-column prop="course_name" label="课程名称" min-width="150" />
         <el-table-column prop="teacher_name" label="教师姓名" width="100" />
         <el-table-column label="实验室" width="150">

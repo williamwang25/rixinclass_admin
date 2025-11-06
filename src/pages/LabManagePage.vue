@@ -45,9 +45,9 @@
         <el-table-column prop="lab_admin" label="管理员" width="100" />
         <el-table-column label="操作" width="220" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-            <el-button link type="info" @click="handleDetail(row)">详情</el-button>
-            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button type="warning" size="small" round @click="handleEdit(row)">编辑</el-button>
+            <el-button type="primary" size="small" round @click="handleDetail(row)">详情</el-button>
+            <el-button type="danger" size="small" round @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

@@ -88,21 +88,38 @@ exports.main = async (event, context) => {
         data: {
           schedule_id: Date.now() + Math.floor(Math.random() * 1000),
           booking_id: bookingId,
+          booking_no: booking.booking_no,
+          // 实验室信息
           lab_id: lab.lab_id,
           lab_name: lab.lab_name,
           building: lab.building,
           lab_room: lab.lab_room,
+          // 课程信息
+          course_code: booking.course_code || '',
           course_name: booking.course_name,
-          teacher_name: booking.teacher_name,
+          course_type: booking.course_type || '实验教学',
+          class_name: booking.class_name || '',
+          required_hours: booking.required_hours || 0,
+          booking_hours: booking.booking_hours || 0,
           student_count: booking.student_count,
+          // 教师信息
+          teacher_name: booking.teacher_name,
+          teacher_phone: booking.teacher_phone || '',
+          teacher_email: booking.teacher_email || '',
+          // 要求
+          software_requirements: booking.software_requirements || '',
+          other_requirements: booking.other_requirements || '',
+          // 时间段
           weekday: slot.weekday,
           week_start: slot.week_start,
           week_end: slot.week_end,
           period_start: slot.period_start,
           period_end: slot.period_end,
+          // 学期
           academic_year: booking.academic_year,
           semester: booking.semester,
-          is_manual: 1,  // 标记为手动排课
+          // 标记
+          is_manual: 1,  // 手动排课
           create_time: new Date(),
           is_deleted: 0
         }

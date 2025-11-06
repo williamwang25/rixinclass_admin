@@ -194,3 +194,21 @@ export async function getMySchedules(params) {
   return await callFunction('getMySchedules', params)
 }
 
+/**
+ * 获取用户列表
+ * @param {Object} params - 查询参数
+ * @returns {Promise<Object>} 用户列表
+ */
+export async function getUserList(params = {}) {
+  return await callFunction('getUserList', params)
+}
+
+/**
+ * 用户管理操作
+ * @param {Object} params - 操作参数
+ * @returns {Promise<Object>} 操作结果
+ */
+export async function manageUser(params) {
+  return await callFunction('manageUser', params)
+}
+

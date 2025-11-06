@@ -7,7 +7,7 @@
         <div style="flex: 1;"></div>
         
         <el-button type="primary" :icon="MagicStick" @click="batchSchedule" :loading="batchLoading">
-          批量自动排课
+          自动排课
         </el-button>
         <el-button :icon="Refresh" @click="loadData" :loading="loading">刷新</el-button>
       </div>
@@ -43,7 +43,7 @@
         </el-table-column>
         <el-table-column label="操作" width="300" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="showDetail(row)">详情</el-button>
+            <el-button type="primary" size="small" round @click="showDetail(row)">详情</el-button>
             <el-button link type="success" size="small" @click="handleSchedule(row)" :loading="scheduling[row.booking_id]">
               自动
             </el-button>

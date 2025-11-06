@@ -43,6 +43,11 @@
             <el-icon><Bell /></el-icon>
             <template #title>公告管理</template>
           </el-menu-item>
+          
+          <el-menu-item index="/users">
+            <el-icon><User /></el-icon>
+            <template #title>用户管理</template>
+          </el-menu-item>
         </el-menu>
       </el-aside>
       
@@ -93,6 +98,7 @@ import {
   List,
   OfficeBuilding,
   Bell,
+  User,
   UserFilled,
   SwitchButton,
   Expand,

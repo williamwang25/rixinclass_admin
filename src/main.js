@@ -16,6 +16,7 @@ import SchedulePage from './pages/SchedulePage.vue'
 import ResultPage from './pages/ResultPage.vue'
 import LabManagePage from './pages/LabManagePage.vue'
 import NoticePage from './pages/NoticePage.vue'
+import UserManagePage from './pages/UserManagePage.vue'
 
 // 定义路由
 const routes = [
@@ -58,6 +59,11 @@ const routes = [
         path: 'notice', 
         name: 'Notice',
         component: NoticePage 
+      },
+      { 
+        path: 'users', 
+        name: 'Users',
+        component: UserManagePage 
       }
     ]
   },

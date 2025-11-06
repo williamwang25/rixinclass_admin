@@ -43,7 +43,7 @@
     <!-- 图表网格 - 第一行 -->
     <el-row :gutter="20" style="margin-bottom: 20px;">
       <!-- 申请状态分布 - 饼图 -->
-      <el-col :span="8">
+      <el-col :span="6">
         <el-card shadow="never">
           <template #header>
             <div class="chart-header">
@@ -51,12 +51,12 @@
               <span>申请状态分布</span>
             </div>
           </template>
-          <div ref="statusChartRef" style="height: 300px;"></div>
+          <div ref="statusChartRef" style="height: 280px;"></div>
         </el-card>
       </el-col>
       
       <!-- 课程类型分布 - 饼图 -->
-      <el-col :span="8">
+      <el-col :span="6">
         <el-card shadow="never">
           <template #header>
             <div class="chart-header">
@@ -64,48 +64,58 @@
               <span>课程类型分布</span>
             </div>
           </template>
-          <div ref="courseTypeChartRef" style="height: 300px;"></div>
+          <div ref="courseTypeChartRef" style="height: 280px;"></div>
         </el-card>
       </el-col>
       
       <!-- 统计概览 - 数据卡 -->
-      <el-col :span="8">
-        <el-card shadow="never">
+      <el-col :span="6">
+        <el-card shadow="never" style="height: 375px;">
           <template #header>
             <div class="chart-header">
               <el-icon><DataAnalysis /></el-icon>
               <span>统计概览</span>
             </div>
           </template>
-          <div class="overview-stats">
-            <div class="overview-item">
-              <div class="overview-label">已通过率</div>
-              <div class="overview-value" style="color: #67C23A;">
+          <div class="overview-stats-compact">
+            <div class="overview-item-compact">
+              <div class="overview-label-compact">已通过率</div>
+              <div class="overview-value-compact" style="color: #67C23A;">
                 {{ approvalRate }}%
               </div>
             </div>
-            <el-divider />
-            <div class="overview-item">
-              <div class="overview-label">已排课率</div>
-              <div class="overview-value" style="color: #0096C2;">
+            <div class="overview-item-compact">
+              <div class="overview-label-compact">已排课率</div>
+              <div class="overview-value-compact" style="color: #0096C2;">
                 {{ scheduleRate }}%
               </div>
             </div>
-            <el-divider />
-            <div class="overview-item">
-              <div class="overview-label">平均学生数</div>
-              <div class="overview-value" style="color: #E6A23C;">
-                {{ stats.studentStats.average }} 人
+            <div class="overview-item-compact">
+              <div class="overview-label-compact">平均学生</div>
+              <div class="overview-value-compact" style="color: #E6A23C;">
+                {{ stats.studentStats.average }}
               </div>
             </div>
-            <el-divider />
-            <div class="overview-item">
-              <div class="overview-label">实验室总数</div>
-              <div class="overview-value" style="color: #909399;">
-                {{ stats.labUsageData.length }} 个
+            <div class="overview-item-compact">
+              <div class="overview-label-compact">实验室</div>
+              <div class="overview-value-compact" style="color: #909399;">
+                {{ stats.labUsageData.length }}
               </div>
             </div>
           </div>
+        </el-card>
+      </el-col>
+      
+      <!-- 教师申请排名 - 条形图 -->
+      <el-col :span="6">
+        <el-card shadow="never">
+          <template #header>
+            <div class="chart-header">
+              <el-icon><Histogram /></el-icon>
+              <span>教师申请排名</span>
+            </div>
+          </template>
+          <div ref="teacherRankChartRef" style="height: 280px;"></div>
         </el-card>
       </el-col>
     </el-row>
@@ -113,7 +123,7 @@
     <!-- 图表网格 - 第二行 -->
     <el-row :gutter="20" style="margin-bottom: 20px;">
       <!-- 最近7天申请趋势 - 折线图 -->
-      <el-col :span="16">
+      <el-col :span="24">
         <el-card shadow="never">
           <template #header>
             <div class="chart-header">
@@ -121,20 +131,7 @@
               <span>最近7天申请趋势</span>
             </div>
           </template>
-          <div ref="trendChartRef" style="height: 320px;"></div>
-        </el-card>
-      </el-col>
-      
-      <!-- 教师申请排名 - 条形图 -->
-      <el-col :span="8">
-        <el-card shadow="never">
-          <template #header>
-            <div class="chart-header">
-              <el-icon><Histogram /></el-icon>
-              <span>教师申请排名 Top 5</span>
-            </div>
-          </template>
-          <div ref="teacherRankChartRef" style="height: 320px;"></div>
+          <div ref="trendChartRef" style="height: 280px;"></div>
         </el-card>
       </el-col>
     </el-row>
@@ -513,9 +510,10 @@ const renderHeatmapChart = () => {
   const weekdays = ['周一', '周二', '周三', '周四', '周五']
   const periods = Array.from({ length: 12 }, (_, i) => `第${i + 1}节`)
   
+  // 修改数据映射：y轴倒序（从第1节到第12节从上到下）
   const heatmapData = stats.value.timeHeatmap.map(item => [
     item.weekday - 1,
-    item.period - 1,
+    12 - item.period,  // 倒序：12 - period
     item.count
   ])
   
@@ -525,25 +523,31 @@ const renderHeatmapChart = () => {
     tooltip: {
       position: 'top',
       formatter: (params) => {
-        return `${weekdays[params.data[0]]} ${periods[params.data[1]]}<br/>占用: ${params.data[2]} 次`
+        const period = 12 - params.data[1]
+        return `${weekdays[params.data[0]]} 第${period}节<br/>占用: ${params.data[2]} 次`
       }
     },
     grid: {
-      height: '70%',
-      top: '5%',
-      left: '8%',
-      right: '3%'
+      height: '75%',
+      top: '12%',
+      left: '10%',
+      right: '3%',
+      bottom: '10%'
     },
     xAxis: {
       type: 'category',
       data: weekdays,
+      position: 'top',  // 标签放在上方
       splitArea: {
         show: true
+      },
+      axisLabel: {
+        fontSize: 12
       }
     },
     yAxis: {
       type: 'category',
-      data: periods,
+      data: periods.reverse(),  // 倒序显示（1-12从上到下）
       splitArea: {
         show: true
       },
@@ -560,6 +564,10 @@ const renderHeatmapChart = () => {
       bottom: '0%',
       inRange: {
         color: ['#e6f4ff', '#0096C2', '#007399']
+      },
+      text: ['高', '低'],
+      textStyle: {
+        fontSize: 11
       }
     },
     series: [
@@ -713,23 +721,27 @@ onBeforeUnmount(() => {
   font-size: 14px;
 }
 
-.overview-stats {
+.overview-stats-compact {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 280px;
   padding: 10px 0;
 }
 
-.overview-item {
+.overview-item-compact {
   text-align: center;
-  padding: 15px 0;
+  padding: 8px 0;
 }
 
-.overview-label {
-  font-size: 13px;
+.overview-label-compact {
+  font-size: 12px;
   color: #909399;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
-.overview-value {
-  font-size: 32px;
+.overview-value-compact {
+  font-size: 28px;
   font-weight: bold;
 }
 

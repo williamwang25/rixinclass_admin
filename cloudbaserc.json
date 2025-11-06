@@ -257,6 +257,36 @@
         ".git",
         ".gitignore"
       ]
+    },
+    {
+      "name": "getUserList",
+      "timeout": 15,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "manageUser",
+      "timeout": 15,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
     }
   ]
 }

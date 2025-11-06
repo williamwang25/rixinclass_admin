@@ -48,7 +48,7 @@
         </el-table-column>
         <el-table-column label="操作" width="260" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="showDetail(row)">详情</el-button>
+            <el-button type="primary" size="small" round @click="showDetail(row)">详情</el-button>
             <el-button v-if="row.status === 0" link type="success" size="small" @click="handleApprove(row)">通过</el-button>
             <el-button v-if="row.status === 0" link type="danger" size="small" @click="handleReject(row)">拒绝</el-button>
             <el-button link type="info" size="small" @click="handleSendMessage(row)">
