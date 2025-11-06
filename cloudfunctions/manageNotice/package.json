@@ -1,0 +1,10 @@
+{
+  "name": "manageNotice",
+  "version": "1.0.0",
+  "description": "公告管理",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
+

@@ -1,0 +1,154 @@
+部署
+危险
+fn deploy 命令部署函数的文件大小总计不能超过 50 M，否则可能会部署失败。
+
+在一个包含 cloudbaserc.json 配置文件的项目下，您可以直接使用下面的命令部署云函数：
+
+tcb fn deploy <functionName>
+
+使用 fn deploy 时，functionName 选项是可以省略的，当 functionName 省略时，Cloudbase CLI 会部署配置文件中的全部函数：
+
+# 部署配置文件中的全部函数
+tcb fn deploy
+
+
+
+配置
+在 CLI 配置文件中，functions 数组可以包含多个函数配置项，函数配置项包含了函数名称（name），函数运行配置（config），函数调用传入参数（params）等多项与函数相关的信息，影响着函数操作的行为表现。
+
+函数配置项
+一个简单的例子：
+
+{
+  // 关联环境 ID
+  "envId": "dev-xxxx",
+  // 函数配置
+  "functions": [
+    {
+      // functions 文件夹下函数文件夹的名称，即函数名
+      "name": "app",
+      // 超时时间，单位：秒 S
+      "timeout": 5,
+      "runtime": "Nodejs10.15",
+      "installDependency": true,
+      "handler": "index.main"
+    }
+  ]
+}
+
+注意事项
+0.6.0 版本起，为了简化使用，我们对 cloudbaserc.json 配置文件 functions 选项中的 config 选项进行了扁平化处理，原有 config 选项中的所有配置项都可以直接写在 functions 选项中。
+
+下面为目前所有支持的配置项
+
+配置项	是否必填	类型	描述
+name	是	String	云函数名称，即为函数部署后的名称
+params	否	Object/JSONObject	CIL 调用云函数时的函数入参
+triggers	否	Array<CloudFunctionTrigger>	触发器配置
+handler	否	String	函数处理方法名称，名称格式支持“文件名称.函数名称”形式
+ignore	否	String/Array<String>	部署/更新云函数代码时的忽略文件，支持 glob 匹配规则
+timeout	否	Number	函数超时时间（1 - 60S）
+envVariables	否	Object	包含环境变量的键值对对象
+vpc	否	VPC	私有网络配置
+runtime	否	String	运行时环境配置，可选值： Nodejs8.9, Nodejs10.15 Php7, Java8
+memorySize	否	Number	函数内存，默认值为 256，可选 128、256、512、1024、2048
+installDependency	否	Boolean	是否云端安装依赖，目前仅支持 Node.js
+codeSecret	否	String	代码加密秘钥，格式为 36 位大小写字母、数字
+注：runtime 默认为 Nodejs10.15，使用 Node.js 运行时可不填，使用 Php 和 Java 则必填。
+启用代码加密后，将无法在小程序 IDE、腾讯云控制台中查看云函数的代码和信息
+CloudFunctionTrigger
+名称	是否必填	类型	描述
+name	是	String	触发器名称
+type	是	String	触发器类型，可选值：timer
+config	是	String	触发器配置，在定时触发器下，config 格式为 cron 表达式
+VPC
+名称	是否必填	类型	描述
+vpcId	是	String	VPC Id
+subnetId	是	String	VPC 子网 Id
+更新函数运行时配置
+创建函数式，Cloudbase CLI 会为函数提供一些默认的配置，所以您不需要添加配置信息也可以直接部署函数。您也可以通过下面的命令修改函数的运行时配置
+
+# 更新 app 函数的配置
+tcb fn config update app
+
+# 更新配置文件中所有函数的配置信息
+tcb fn config update
+
+目前支持修改的函数配置包含超时时间 timeout、环境变量 envVariables、运行时 runtime，vpc网络以及 installDependency 等选项。
+
+CloudBase CLI 会从配置文件中读取函数的配置信息并更新，CloudBase CLI 会更新配置文件中存在的函数的所有配置，暂不支持指定更新单个配置选项。
+
+配置项参考
+{
+  // 关联环境 ID
+  "envId": "dev-xxxx",
+  // 函数配置
+  "functions": [
+    {
+      // functions 文件夹下函数文件夹的名称，即函数名
+      "name": "app",
+      // 超时时间，单位：秒 S
+      "timeout": 5,
+      // 环境变量
+      "envVariables": {
+        "key": "value"
+      },
+      // 私有网络配置，如果不使用私有网络，可不配置
+      "vpc": {
+        // vpc id
+        "vpcId": "vpc-xxx",
+        // 子网 id
+        "subnetId": "subnet-xxx"
+      },
+      // 运行时，目前可选运行包含：Nodejs 18.15, Nodejs 16.13, Nodejs 14.18, Nodejs 12.16, Nodejs 10.15, Php 8.0, Php 7.4, Php 7.2, Python 3.9, Python 3.7, Python 3.6, Python 2.7, Golang 1, Java 8
+      // 此参数可以省略，默认为 Nodejs10.15
+      "runtime": "Nodejs10.15",
+      // 是否云端安装依赖，仅支持 Node.js 项目
+      "installDependency": true,
+      // 函数触发器，说明见文档: https://cloud.tencent.com/document/product/876/32314
+      "triggers": [
+        {
+          // name: 触发器的名字
+          "name": "myTrigger",
+          // type: 触发器类型，目前仅支持 timer （即定时触发器）
+          "type": "timer",
+          // config: 触发器配置，在定时触发器下，config 格式为 cron 表达式
+          "config": "0 0 2 1 * * *"
+        }
+      ],
+      // 函数处理入口，Node.js 和 PHP 项目可以省略，默认值为 index.main
+      // 因 Java 的 handler 配置较为特殊，所以当运行时为 Java 时，handler 不能省略
+      // 如：package.Class::mainHandler
+      "handler": "index.main",
+      // fn invoke 本地触发云函数时的调用参数
+      "params": {},
+      // 部署/更新云函数时忽略的文件
+      "ignore": [
+        // 忽略 markdown 文件
+        "*.md",
+        // 忽略 node_modules 文件夹
+        "node_modules",
+        "node_modules/**/*"
+      ]
+    }
+  ]
+}
+
+
+简单参考配置
+下面是一个简单的 CLI 配置文件包含的基本信息：
+
+{
+  "version": "2.0",
+  "envId": "dev-xxxx",
+  "functionRoot": "functions",
+  "functions": [
+    {
+      "name": "app",
+      "timeout": 5,
+      "envVariables": {
+        "key": "value"
+      }
+    }
+  ]
+}

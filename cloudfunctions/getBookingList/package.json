@@ -1,0 +1,10 @@
+{
+  "name": "getBookingList",
+  "version": "1.0.0",
+  "description": "获取申请列表",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
+

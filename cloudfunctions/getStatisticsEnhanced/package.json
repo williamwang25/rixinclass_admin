@@ -1,0 +1,10 @@
+{
+  "name": "getStatisticsEnhanced",
+  "version": "1.0.0",
+  "description": "获取增强统计数据",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
+

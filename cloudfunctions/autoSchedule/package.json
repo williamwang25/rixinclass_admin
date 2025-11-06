@@ -1,0 +1,10 @@
+{
+  "name": "autoSchedule",
+  "version": "1.0.0",
+  "description": "自动排课",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
+

@@ -1,28 +1,102 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import './style.css'
 import App from './App.vue'
+import { ensureLogin } from './utils/cloudbase'
 
 // 导入页面组件
-import HomePage from './pages/HomePage.vue'
+import LoginPage from './pages/LoginPage.vue'
+import Layout from './components/Layout.vue'
+import DashboardPage from './pages/DashboardPage.vue'
+import ReviewPage from './pages/ReviewPage.vue'
+import SchedulePage from './pages/SchedulePage.vue'
+import ResultPage from './pages/ResultPage.vue'
+import LabManagePage from './pages/LabManagePage.vue'
+import NoticePage from './pages/NoticePage.vue'
 
 // 定义路由
 const routes = [
-  { path: '/', component: HomePage },
-  { path: '/:pathMatch(.*)*', redirect: '/' } // 404重定向到首页
+  { 
+    path: '/login', 
+    name: 'Login',
+    component: LoginPage 
+  },
+  {
+    path: '/',
+    component: Layout,
+    redirect: '/dashboard',
+    children: [
+      { 
+        path: 'dashboard', 
+        name: 'Dashboard',
+        component: DashboardPage 
+      },
+      { 
+        path: 'review', 
+        name: 'Review',
+        component: ReviewPage 
+      },
+      { 
+        path: 'schedule', 
+        name: 'Schedule',
+        component: SchedulePage 
+      },
+      { 
+        path: 'result', 
+        name: 'Result',
+        component: ResultPage 
+      },
+      { 
+        path: 'labs', 
+        name: 'Labs',
+        component: LabManagePage 
+      },
+      { 
+        path: 'notice', 
+        name: 'Notice',
+        component: NoticePage 
+      }
+    ]
+  },
+  { path: '/:pathMatch(.*)*', redirect: '/dashboard' }
 ]
 
-// 创建路由实例 - 使用hash模式避免静态托管时的刷新404问题
+// 创建路由实例
 const router = createRouter({
   history: createWebHashHistory(),
   routes
 })
 
+// 路由守卫
+router.beforeEach(async (to, from, next) => {
+  if (to.path === '/login') {
+    next()
+    return
+  }
+  
+  try {
+    await ensureLogin()
+    next()
+  } catch (error) {
+    console.error('登录检查失败:', error)
+    next('/login')
+  }
+})
+
 // 创建应用实例
 const app = createApp(App)
 
-// 使用路由
+// 注册 Element Plus 图标
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component)
+}
+
+// 使用插件
 app.use(router)
+app.use(ElementPlus)
 
 // 挂载应用
 app.mount('#app') 

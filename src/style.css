@@ -1,17 +1,115 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* BJUT 主题配色 */
+:root {
+  /* BJUT 官方色 */
+  --bjut-blue: #0096C2;
+  --bjut-blue-light: #33AAD1;
+  --bjut-blue-dark: #007399;
 
-/* 全局样式 */
-html {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  /* Element Plus 主题覆盖 */
+  --el-color-primary: #0096C2;
+  --el-color-primary-light-3: #33AAD1;
+  --el-color-primary-light-5: #66BED9;
+  --el-color-primary-light-7: #99D2E1;
+  --el-color-primary-light-9: #CCE9ED;
+  --el-color-primary-dark-2: #007399;
+  
+  --el-color-success: #67C23A;
+  --el-color-warning: #E6A23C;
+  --el-color-danger: #F56C6C;
+  --el-color-info: #909399;
+  
+  /* 背景色 */
+  --bg-page: #F5F5F5;
+  --bg-card: #FFFFFF;
+  --bg-menu: #F5F5F5;
+  
+  /* 边框色 */
+  --border-color: #DCDCDC;
+  
+  /* 布局尺寸 */
+  --menu-width-expanded: 200px;
+  --menu-width-collapsed: 64px;
+  --header-height: 60px;
+  --content-padding: 20px;
 }
 
-body {
+/* 全局样式重置 */
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #app {
-  min-height: 100vh;
-} 
+  height: 100%;
+  width: 100%;
+}
+
+/* Element Plus 主题定制 */
+.el-button--primary {
+  --el-button-bg-color: var(--bjut-blue);
+  --el-button-border-color: var(--bjut-blue);
+  --el-button-hover-bg-color: var(--bjut-blue-light);
+  --el-button-hover-border-color: var(--bjut-blue-light);
+  --el-button-active-bg-color: var(--bjut-blue-dark);
+  --el-button-active-border-color: var(--bjut-blue-dark);
+}
+
+.el-menu-item.is-active {
+  background-color: var(--bjut-blue) !important;
+  color: #fff !important;
+}
+
+/* 卡片样式 */
+.stat-card {
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 150, 194, 0.15);
+}
+
+/* 页面容器 */
+.page-container {
+  padding: var(--content-padding);
+  background: var(--bg-page);
+  min-height: calc(100vh - var(--header-height));
+}
+
+/* 工具栏 */
+.toolbar {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 状态标签颜色 */
+.status-pending {
+  --el-tag-bg-color: var(--el-color-warning-light-9);
+  --el-tag-border-color: var(--el-color-warning-light-8);
+  --el-tag-text-color: var(--el-color-warning);
+}
+
+.status-approved {
+  --el-tag-bg-color: var(--el-color-success-light-9);
+  --el-tag-border-color: var(--el-color-success-light-8);
+  --el-tag-text-color: var(--el-color-success);
+}
+
+.status-rejected {
+  --el-tag-bg-color: var(--el-color-danger-light-9);
+  --el-tag-border-color: var(--el-color-danger-light-8);
+  --el-tag-text-color: var(--el-color-danger);
+}

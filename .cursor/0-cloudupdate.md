@@ -1,0 +1,22 @@
+tcb fn deploy xxxx
+
+
+
+tcb fn deploy
+
+autoSchedule
+getBookingList
+getCarouselList
+getLabList
+getMyMessages
+getMySchedules
+getNoticeList
+getScheduleList
+getStatistics
+getStatisticsEnhanced
+manageCarousel
+manageLabOperation
+manageNotice
+manualSchedule
+markMessageRead
+reviewBooking

@@ -1,0 +1,10 @@
+{
+  "name": "manageLabOperation",
+  "version": "1.0.0",
+  "description": "实验室管理操作（增删改）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
+

@@ -1,17 +1,262 @@
 {
   "version": "2.0",
-  "envId": "{{env.ENV_ID}}",
-  "$schema": "https://framework-1258016615.tcloudbaseapp.com/schema/latest.json",
-  "framework": {
-    "name": "cloudbase-vue-template",
-    "plugins": {
-      "client": {
-        "use": "@cloudbase/framework-plugin-website",
-        "inputs": {
-          "outputPath": "dist",
-          "buildCommand": "npm run build"
-        }
-      }
+  "envId": "cloud1-1gt445eta224436c",
+  "functionRoot": "./cloudfunctions",
+  "functions": [
+    {
+      "name": "getStatistics",
+      "timeout": 15,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "getStatisticsEnhanced",
+      "timeout": 30,
+      "runtime": "Nodejs18.15",
+      "memorySize": 512,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "getBookingList",
+      "timeout": 15,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "reviewBooking",
+      "timeout": 15,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "autoSchedule",
+      "timeout": 30,
+      "runtime": "Nodejs18.15",
+      "memorySize": 512,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "getScheduleList",
+      "timeout": 15,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "manualSchedule",
+      "timeout": 20,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "getLabList",
+      "timeout": 15,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "manageLabOperation",
+      "timeout": 15,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "getCarouselList",
+      "timeout": 15,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "manageCarousel",
+      "timeout": 15,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "getNoticeList",
+      "timeout": 15,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "manageNotice",
+      "timeout": 15,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "sendMessage",
+      "timeout": 10,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "getMyMessages",
+      "timeout": 15,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "markMessageRead",
+      "timeout": 10,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
+    },
+    {
+      "name": "getMySchedules",
+      "timeout": 20,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main",
+      "ignore": [
+        "*.md",
+        "node_modules",
+        "node_modules/**/*",
+        ".git",
+        ".gitignore"
+      ]
     }
-  }
-} 
+  ]
+}
