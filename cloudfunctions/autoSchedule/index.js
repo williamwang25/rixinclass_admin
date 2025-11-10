@@ -30,6 +30,69 @@ async function checkConflict(labId, timeSlot) {
   return data.length > 0
 }
 
+/**
+ * 匹配软件环境
+ * @param {Object} lab - 实验室信息
+ * @param {string} requiredSoftware - 申请的软件要求
+ * @returns {boolean} 是否匹配
+ */
+function matchSoftwareEnv(lab, requiredSoftware) {
+  // 如果没有软件要求，则任何实验室都可以
+  if (!requiredSoftware || requiredSoftware.trim() === '') {
+    console.log('[matchSoftwareEnv] 无软件要求，匹配成功')
+    return true
+  }
+  
+  // 如果实验室没有配置软件环境，则不匹配
+  if (!lab.software_envs || lab.software_envs.length === 0) {
+    console.log('[matchSoftwareEnv] 实验室无软件环境配置')
+    return false
+  }
+  
+  // 将申请的软件要求分词（按空格、逗号、分号等分隔）
+  const requiredKeywords = requiredSoftware
+    .toLowerCase()
+    .split(/[,，;；\s]+/)
+    .filter(k => k.trim().length > 0)
+  
+  console.log('[matchSoftwareEnv] 软件要求关键词:', requiredKeywords)
+  
+  // 遍历实验室的每个软件环境
+  for (const env of lab.software_envs) {
+    if (!env.software || env.software.length === 0) {
+      continue
+    }
+    
+    // 将环境中的所有软件名称合并成字符串
+    const envSoftwareStr = env.software.join(' ').toLowerCase()
+    const envOsStr = (env.os || '').toLowerCase()
+    const combinedStr = envSoftwareStr + ' ' + envOsStr
+    
+    // 检查是否所有关键词都能在某个环境中找到
+    const allMatched = requiredKeywords.every(keyword => 
+      combinedStr.includes(keyword)
+    )
+    
+    if (allMatched) {
+      console.log('[matchSoftwareEnv] 匹配成功 - 环境ID:', env.env_id)
+      return true
+    }
+    
+    // 或者部分匹配（至少匹配50%的关键词）
+    const matchedCount = requiredKeywords.filter(keyword => 
+      combinedStr.includes(keyword)
+    ).length
+    
+    if (matchedCount >= Math.ceil(requiredKeywords.length * 0.5)) {
+      console.log('[matchSoftwareEnv] 部分匹配成功 - 环境ID:', env.env_id, '匹配度:', matchedCount, '/', requiredKeywords.length)
+      return true
+    }
+  }
+  
+  console.log('[matchSoftwareEnv] 无匹配环境')
+  return false
+}
+
 exports.main = async (event, context) => {
   try {
     const { bookingId } = event
@@ -88,9 +151,25 @@ exports.main = async (event, context) => {
     }
     
     console.log('[autoSchedule] 候选实验室数量:', labs.length)
+    console.log('[autoSchedule] 软件要求:', booking.software_requirements || '无')
     
-    // 4. 遍历实验室检测冲突
+    // 4. 遍历实验室，进行软件环境匹配和冲突检测
     for (const lab of labs) {
+      // 4.1 检查软件环境是否匹配
+      if (!matchSoftwareEnv(lab, booking.software_requirements)) {
+        console.log('[autoSchedule] 实验室软件环境不匹配:', {
+          labId: lab.lab_id,
+          labName: lab.lab_name
+        })
+        continue  // 跳过此实验室
+      }
+      
+      console.log('[autoSchedule] 实验室软件环境匹配:', {
+        labId: lab.lab_id,
+        labName: lab.lab_name
+      })
+      
+      // 4.2 检测时间冲突
       let hasConflict = false
       
       for (const slot of timeSlots) {
@@ -198,11 +277,22 @@ exports.main = async (event, context) => {
       }
     }
     
-    // 6. 所有实验室都冲突
-    console.log('[autoSchedule] 所有实验室都冲突')
-    return {
-      success: false,
-      message: '所有实验室在该时间段都已被占用，请手动调整'
+    // 6. 所有实验室都不满足条件
+    console.log('[autoSchedule] 所有实验室都不满足条件')
+    
+    // 区分失败原因
+    const hasAnySoftwareMatch = labs.some(lab => matchSoftwareEnv(lab, booking.software_requirements))
+    
+    if (!hasAnySoftwareMatch) {
+      return {
+        success: false,
+        message: '没有实验室的软件环境满足申请要求，请手动选择实验室'
+      }
+    } else {
+      return {
+        success: false,
+        message: '满足软件要求的实验室在该时间段都已被占用，请手动调整'
+      }
     }
   } catch (error) {
     console.error('[autoSchedule] 失败:', error)

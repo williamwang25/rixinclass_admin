@@ -44,7 +44,7 @@ exports.main = async (event, context) => {
 
 // 创建实验室
 async function createLab(labData) {
-  const { labRoom, labName, building, floor, capacity, softwareEnv, hardwareEnv, supportNotes, labAdmin } = labData
+  const { labRoom, labName, building, floor, capacity, softwareEnvs, hardwareEnv, supportNotes, labAdmin } = labData
   
   // 验证必填字段
   if (!labRoom || !labName || !building || !capacity) {
@@ -65,7 +65,7 @@ async function createLab(labData) {
       building,
       floor: floor || 1,
       capacity,
-      software_env: softwareEnv || {},
+      software_envs: softwareEnvs || [],  // 改为数组，支持多个环境
       hardware_env: hardwareEnv || '',
       support_notes: supportNotes || '',
       lab_admin: labAdmin || '',
@@ -87,7 +87,7 @@ async function createLab(labData) {
 
 // 更新实验室
 async function updateLab(labData) {
-  const { labId, labRoom, labName, building, floor, capacity, softwareEnv, hardwareEnv, supportNotes, labAdmin, status } = labData
+  const { labId, labRoom, labName, building, floor, capacity, softwareEnvs, hardwareEnv, supportNotes, labAdmin, status } = labData
   
   if (!labId) {
     return {
@@ -105,7 +105,7 @@ async function updateLab(labData) {
   if (building !== undefined) updateData.building = building
   if (floor !== undefined) updateData.floor = floor
   if (capacity !== undefined) updateData.capacity = capacity
-  if (softwareEnv !== undefined) updateData.software_env = softwareEnv
+  if (softwareEnvs !== undefined) updateData.software_envs = softwareEnvs  // 改为数组
   if (hardwareEnv !== undefined) updateData.hardware_env = hardwareEnv
   if (supportNotes !== undefined) updateData.support_notes = supportNotes
   if (labAdmin !== undefined) updateData.lab_admin = labAdmin

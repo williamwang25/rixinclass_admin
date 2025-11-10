@@ -1,6 +1,6 @@
 tcb fn deploy xxxx
 
-
+tcb fn deploy updateUserInfo
 
 tcb fn deploy
 

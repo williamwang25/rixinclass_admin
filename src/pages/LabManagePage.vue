@@ -26,13 +26,20 @@
         stripe
         border
       >
-        <el-table-column prop="lab_room" label="房间号" width="100" />
+        <el-table-column prop="lab_room" label="房间号" width="120" />
         <el-table-column prop="lab_name" label="实验室名称" min-width="150" />
-        <el-table-column prop="building" label="楼栋" width="120" />
-        <el-table-column prop="floor" label="楼层" width="80" align="center" />
+        <el-table-column prop="building" label="楼栋" width="100" />
+        <el-table-column prop="floor" label="楼层" width="70" align="center" />
         <el-table-column prop="capacity" label="容量" width="80" align="center">
           <template #default="{ row }">
             <el-tag size="small">{{ row.capacity }}人</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="软件环境" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag type="info" size="small">
+              {{ row.software_envs?.length || 0 }} 个
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="100" align="center">
@@ -54,28 +61,38 @@
     </el-card>
     
     <!-- 新增/编辑对话框 -->
-    <el-dialog v-model="formVisible" :title="isEdit ? '编辑实验室' : '新增实验室'" width="700px">
+    <el-dialog v-model="formVisible" :title="isEdit ? '编辑实验室' : '新增实验室'" width="900px">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
-        <el-form-item label="房间号" prop="labRoom">
-          <el-input v-model="form.labRoom" placeholder="如：505" />
-        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="房间号" prop="labRoom">
+              <el-input v-model="form.labRoom" placeholder="如：505 或 505-506" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="实验室名称" prop="labName">
+              <el-input v-model="form.labName" placeholder="如：计算机图形学实验室" />
+            </el-form-item>
+          </el-col>
+        </el-row>
         
-        <el-form-item label="实验室名称" prop="labName">
-          <el-input v-model="form.labName" placeholder="如：计算机图形学实验室" />
-        </el-form-item>
-        
-        <el-form-item label="楼栋" prop="building">
-          <el-input v-model="form.building" placeholder="如：软件楼" />
-        </el-form-item>
-        
-        <el-form-item label="楼层" prop="floor">
-          <el-input-number v-model="form.floor" :min="1" :max="30" />
-        </el-form-item>
-        
-        <el-form-item label="容量" prop="capacity">
-          <el-input-number v-model="form.capacity" :min="1" :max="200" />
-          <span style="margin-left: 10px; color: #909399;">人</span>
-        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="楼栋" prop="building">
+              <el-input v-model="form.building" placeholder="如：软件楼" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="楼层" prop="floor">
+              <el-input-number v-model="form.floor" :min="1" :max="30" style="width: 100%;" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="容量" prop="capacity">
+              <el-input-number v-model="form.capacity" :min="1" :max="200" style="width: 100%;" />
+            </el-form-item>
+          </el-col>
+        </el-row>
         
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
@@ -84,6 +101,48 @@
             <el-radio :value="2">停用</el-radio>
           </el-radio-group>
         </el-form-item>
+        
+        <el-divider content-position="left">
+          <span style="font-weight: bold;">软件环境配置</span>
+        </el-divider>
+        
+        <!-- 软件环境列表 -->
+        <div v-for="(env, index) in form.softwareEnvs" :key="index" style="margin-bottom: 20px; padding: 15px; border: 1px solid #EBEEF5; border-radius: 4px; background: #F5F7FA;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="font-weight: bold; color: #0096C2;">软件环境 {{ index + 1 }}</span>
+            <el-button type="danger" size="small" link @click="removeEnv(index)" v-if="form.softwareEnvs.length > 1">
+              删除
+            </el-button>
+          </div>
+          
+          <el-form-item label="操作系统" label-width="100px">
+            <el-input v-model="env.os" placeholder="如：Windows 10 专业版" />
+          </el-form-item>
+          
+          <el-form-item label="软件列表" label-width="100px">
+            <el-input 
+              v-model="env.softwareStr" 
+              type="textarea" 
+              :rows="3" 
+              placeholder="每行一个软件，如：&#10;Adobe Photoshop 2020&#10;AutoCAD 2021&#10;CorelDRAW 2019"
+            />
+            <div style="font-size: 12px; color: #909399; margin-top: 4px;">每行一个软件名称</div>
+          </el-form-item>
+          
+          <el-form-item label="支持课程" label-width="100px">
+            <el-input v-model="env.supported_courses" placeholder="如：计算机图形学、数字媒体技术" />
+          </el-form-item>
+          
+          <el-form-item label="其他要求" label-width="100px">
+            <el-input v-model="env.other_requirements" placeholder="选填" />
+          </el-form-item>
+        </div>
+        
+        <el-button type="primary" :icon="Plus" @click="addEnv" plain style="width: 100%; margin-bottom: 20px;">
+          添加软件环境
+        </el-button>
+        
+        <el-divider />
         
         <el-form-item label="硬件环境">
           <el-input v-model="form.hardwareEnv" type="textarea" :rows="2" placeholder="如：Dell OptiPlex 7080, Intel i7, 16GB RAM" />
@@ -105,7 +164,7 @@
     </el-dialog>
     
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailVisible" title="实验室详情" width="700px">
+    <el-dialog v-model="detailVisible" title="实验室详情" width="800px">
       <el-descriptions :column="2" border v-if="currentRow">
         <el-descriptions-item label="房间号">{{ currentRow.lab_room }}</el-descriptions-item>
         <el-descriptions-item label="实验室名称">{{ currentRow.lab_name }}</el-descriptions-item>
@@ -121,6 +180,28 @@
         <el-descriptions-item label="说明备注" :span="2">{{ currentRow.support_notes || '-' }}</el-descriptions-item>
         <el-descriptions-item label="管理员" :span="2">{{ currentRow.lab_admin || '-' }}</el-descriptions-item>
       </el-descriptions>
+      
+      <!-- 软件环境列表 -->
+      <el-divider>软件环境配置</el-divider>
+      <div v-if="currentRow.software_envs && currentRow.software_envs.length > 0">
+        <el-card v-for="(env, index) in currentRow.software_envs" :key="index" shadow="never" style="margin-bottom: 12px;">
+          <template #header>
+            <span style="font-weight: bold;">软件环境 {{ index + 1 }}</span>
+          </template>
+          <el-descriptions :column="1" size="small">
+            <el-descriptions-item label="操作系统">{{ env.os || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="软件">
+              <el-tag v-for="(sw, i) in env.software" :key="i" size="small" style="margin-right: 8px;">
+                {{ sw }}
+              </el-tag>
+              <span v-if="!env.software || env.software.length === 0">-</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="支持课程">{{ env.supported_courses || '-' }}</el-descriptions-item>
+            <el-descriptions-item v-if="env.other_requirements" label="其他要求">{{ env.other_requirements }}</el-descriptions-item>
+          </el-descriptions>
+        </el-card>
+      </div>
+      <el-empty v-else description="暂无软件环境配置" :image-size="60" />
     </el-dialog>
   </div>
 </template>
@@ -149,6 +230,14 @@ const form = reactive({
   floor: 1,
   capacity: 50,
   status: 1,
+  softwareEnvs: [
+    {
+      os: '',
+      softwareStr: '',  // 用字符串存储，提交时转为数组
+      supported_courses: '',
+      other_requirements: ''
+    }
+  ],
   hardwareEnv: '',
   supportNotes: '',
   labAdmin: ''
@@ -198,9 +287,34 @@ const resetForm = () => {
   form.floor = 1
   form.capacity = 50
   form.status = 1
+  form.softwareEnvs = [
+    {
+      os: '',
+      softwareStr: '',
+      supported_courses: '',
+      other_requirements: ''
+    }
+  ]
   form.hardwareEnv = ''
   form.supportNotes = ''
   form.labAdmin = ''
+}
+
+// 添加软件环境
+const addEnv = () => {
+  form.softwareEnvs.push({
+    os: '',
+    softwareStr: '',
+    supported_courses: '',
+    other_requirements: ''
+  })
+}
+
+// 删除软件环境
+const removeEnv = (index) => {
+  if (form.softwareEnvs.length > 1) {
+    form.softwareEnvs.splice(index, 1)
+  }
 }
 
 const handleCreate = () => {
@@ -218,6 +332,26 @@ const handleEdit = (row) => {
   form.floor = row.floor
   form.capacity = row.capacity
   form.status = row.status
+  
+  // 处理软件环境数组
+  if (row.software_envs && row.software_envs.length > 0) {
+    form.softwareEnvs = row.software_envs.map(env => ({
+      os: env.os || '',
+      softwareStr: Array.isArray(env.software) ? env.software.join('\n') : '',
+      supported_courses: env.supported_courses || '',
+      other_requirements: env.other_requirements || ''
+    }))
+  } else {
+    form.softwareEnvs = [
+      {
+        os: '',
+        softwareStr: '',
+        supported_courses: '',
+        other_requirements: ''
+      }
+    ]
+  }
+  
   form.hardwareEnv = row.hardware_env || ''
   form.supportNotes = row.support_notes || ''
   form.labAdmin = row.lab_admin || ''
@@ -235,6 +369,15 @@ const handleSubmit = async () => {
     
     submitting.value = true
     
+    // 转换软件环境数据
+    const softwareEnvs = form.softwareEnvs.map((env, index) => ({
+      env_id: index + 1,
+      os: env.os || '',
+      software: env.softwareStr ? env.softwareStr.split('\n').filter(s => s.trim()) : [],
+      supported_courses: env.supported_courses || '',
+      other_requirements: env.other_requirements || ''
+    }))
+    
     const action = isEdit.value ? 'update' : 'create'
     const data = {
       labRoom: form.labRoom,
@@ -243,6 +386,7 @@ const handleSubmit = async () => {
       floor: form.floor,
       capacity: form.capacity,
       status: form.status,
+      softwareEnvs: softwareEnvs,
       hardwareEnv: form.hardwareEnv,
       supportNotes: form.supportNotes,
       labAdmin: form.labAdmin
