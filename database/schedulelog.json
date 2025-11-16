@@ -1,0 +1,113 @@
+[
+  {
+    "log_id": 1,
+    "booking_id": 12345,
+    "booking_no": "BK20241116-001",
+    "admin_user_id": 2,
+    "admin_name": "管理员张三",
+    "action_type": "auto_schedule",
+    "action_result": "success",
+    "lab_id": 101,
+    "lab_name": "软件楼505",
+    "building": "软件楼",
+    "lab_room": "505",
+    "student_count": 30,
+    "lab_capacity": 40,
+    "software_requirements": "Adobe Photoshop 2020, AutoCAD 2021",
+    "matched_software": "Adobe Photoshop 2020, AutoCAD 2021, Windows 10",
+    "match_reason": "实验室容量充足(40>=30)，软件环境完全匹配",
+    "failure_reason": null,
+    "time_slots": [
+      {
+        "weekday": 1,
+        "week_start": 1,
+        "week_end": 16,
+        "period_start": 3,
+        "period_end": 4
+      }
+    ],
+    "course_name": "计算机图形学实验",
+    "teacher_name": "李教授",
+    "academic_year": "2024-2025",
+    "semester": "第一学期",
+    "create_time": "2024-11-16T14:30:00.000Z",
+    "create_user": 2,
+    "update_time": "2024-11-16T14:30:00.000Z",
+    "update_user": null,
+    "is_deleted": 0
+  },
+  {
+    "log_id": 2,
+    "booking_id": 12346,
+    "booking_no": "BK20241116-002",
+    "admin_user_id": 2,
+    "admin_name": "管理员张三",
+    "action_type": "auto_schedule",
+    "action_result": "failure",
+    "lab_id": null,
+    "lab_name": null,
+    "building": null,
+    "lab_room": null,
+    "student_count": 50,
+    "lab_capacity": null,
+    "software_requirements": "MATLAB R2023a, Simulink",
+    "matched_software": null,
+    "match_reason": null,
+    "failure_reason": "无可用实验室：所有实验室容量不足或软件环境不匹配",
+    "time_slots": [
+      {
+        "weekday": 2,
+        "week_start": 1,
+        "week_end": 16,
+        "period_start": 1,
+        "period_end": 2
+      }
+    ],
+    "course_name": "控制系统仿真实验",
+    "teacher_name": "王教授",
+    "academic_year": "2024-2025",
+    "semester": "第一学期",
+    "create_time": "2024-11-16T14:35:00.000Z",
+    "create_user": 2,
+    "update_time": "2024-11-16T14:35:00.000Z",
+    "update_user": null,
+    "is_deleted": 0
+  },
+  {
+    "log_id": 3,
+    "booking_id": 12347,
+    "booking_no": "BK20241116-003",
+    "admin_user_id": 2,
+    "admin_name": "管理员张三",
+    "action_type": "manual_schedule",
+    "action_result": "success",
+    "lab_id": 102,
+    "lab_name": "软件楼518",
+    "building": "软件楼",
+    "lab_room": "518",
+    "student_count": 25,
+    "lab_capacity": 30,
+    "software_requirements": "Visual Studio 2022, SQL Server 2019",
+    "matched_software": "Visual Studio 2022, SQL Server 2019, Windows 11",
+    "match_reason": "管理员手动选择，实验室容量充足(30>=25)，软件环境匹配",
+    "failure_reason": null,
+    "time_slots": [
+      {
+        "weekday": 3,
+        "week_start": 1,
+        "week_end": 16,
+        "period_start": 5,
+        "period_end": 6
+      }
+    ],
+    "course_name": "数据库系统实验",
+    "teacher_name": "赵教授",
+    "academic_year": "2024-2025",
+    "semester": "第一学期",
+    "create_time": "2024-11-16T14:40:00.000Z",
+    "create_user": 2,
+    "update_time": "2024-11-16T14:40:00.000Z",
+    "update_user": null,
+    "is_deleted": 0
+  }
+]

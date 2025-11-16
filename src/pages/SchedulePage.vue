@@ -16,7 +16,7 @@
     <el-card shadow="never">
       <template #header>
         <div class="card-header">
-          <span>已通过但未排课的申请</span>
+          <span>待排课的申请</span>
           <el-tag v-if="!loading">共 {{ tableData.length }} 条</el-tag>
         </div>
       </template>
@@ -74,10 +74,10 @@
           <template #default="{ row }">{{ formatWeekday(row.weekday) }}</template>
         </el-table-column>
         <el-table-column label="周次范围" align="center">
-          <template #default="{ row }">第 {{ row.weekStart }}-{{ row.weekEnd }} 周</template>
+          <template #default="{ row }">第 {{ row.week_start }}-{{ row.week_end }} 周</template>
         </el-table-column>
         <el-table-column label="节次范围" align="center">
-          <template #default="{ row }">第 {{ row.periodStart }}-{{ row.periodEnd }} 节</template>
+          <template #default="{ row }">第 {{ row.period_start }}-{{ row.period_end }} 节</template>
         </el-table-column>
       </el-table>
     </el-dialog>
@@ -143,15 +143,122 @@
         <el-button type="primary" @click="confirmSendMessage" :loading="messageSending">发送</el-button>
       </template>
     </el-dialog>
+    
+    <!-- 排课结果详情对话框 -->
+    <el-dialog 
+      v-model="scheduleResultVisible" 
+      title="排课结果详情" 
+      width="900px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
+      <div v-if="scheduleResult">
+        <!-- 统计概览 -->
+        <el-row :gutter="20" style="margin-bottom: 20px">
+          <el-col :span="8">
+            <el-card shadow="hover" class="stat-card success-card">
+              <div class="stat-content">
+                <div class="stat-icon">
+                  <el-icon :size="32"><CircleCheck /></el-icon>
+                </div>
+                <div class="stat-info">
+                  <div class="stat-label">排课成功</div>
+                  <div class="stat-value">{{ scheduleResult.successCount }}</div>
+                </div>
+              </div>
+            </el-card>
+          </el-col>
+          <el-col :span="8">
+            <el-card shadow="hover" class="stat-card fail-card">
+              <div class="stat-content">
+                <div class="stat-icon">
+                  <el-icon :size="32"><CircleClose /></el-icon>
+                </div>
+                <div class="stat-info">
+                  <div class="stat-label">排课失败</div>
+                  <div class="stat-value">{{ scheduleResult.failCount }}</div>
+                </div>
+              </div>
+            </el-card>
+          </el-col>
+          <el-col :span="8">
+            <el-card shadow="hover" class="stat-card total-card">
+              <div class="stat-content">
+                <div class="stat-icon">
+                  <el-icon :size="32"><Document /></el-icon>
+                </div>
+                <div class="stat-info">
+                  <div class="stat-label">总计</div>
+                  <div class="stat-value">{{ scheduleResult.total }}</div>
+                </div>
+              </div>
+            </el-card>
+          </el-col>
+        </el-row>
+        
+        <!-- 成功列表 -->
+        <div v-if="scheduleResult.successList.length > 0" style="margin-bottom: 20px">
+          <el-divider content-position="left">
+            <el-icon style="color: #67c23a; margin-right: 4px"><CircleCheck /></el-icon>
+            排课成功 ({{ scheduleResult.successList.length }})
+          </el-divider>
+          <el-table :data="scheduleResult.successList" border size="small" max-height="250">
+            <el-table-column prop="bookingNo" label="申请编号" width="140" />
+            <el-table-column prop="courseName" label="课程名称" min-width="150" />
+            <el-table-column prop="labName" label="分配实验室" width="150" />
+            <el-table-column label="状态" width="80" align="center">
+              <template #default>
+                <el-tag type="success" size="small">成功</el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        
+        <!-- 失败列表 -->
+        <div v-if="scheduleResult.failList.length > 0">
+          <el-divider content-position="left">
+            <el-icon style="color: #f56c6c; margin-right: 4px"><CircleClose /></el-icon>
+            排课失败 ({{ scheduleResult.failList.length }})
+          </el-divider>
+          <el-table :data="scheduleResult.failList" border size="small" max-height="250">
+            <el-table-column prop="bookingNo" label="申请编号" width="140" />
+            <el-table-column prop="courseName" label="课程名称" min-width="150" />
+            <el-table-column prop="reason" label="失败原因" min-width="200">
+              <template #default="{ row }">
+                <el-text type="danger" size="small">{{ row.reason }}</el-text>
+              </template>
+            </el-table-column>
+            <el-table-column label="状态" width="80" align="center">
+              <template #default>
+                <el-tag type="danger" size="small">失败</el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+      
+      <template #footer>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <el-button type="primary" plain @click="goToScheduleLog">
+            <el-icon style="margin-right: 4px"><Document /></el-icon>
+            查看排课日志
+          </el-button>
+          <el-button type="primary" @click="scheduleResultVisible = false">关闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
-import { Refresh, MagicStick, ChatDotRound } from '@element-plus/icons-vue'
+import { Refresh, MagicStick, ChatDotRound, CircleCheck, CircleClose, Document } from '@element-plus/icons-vue'
 import { getBookingList, autoSchedule, manualSchedule, getLabList, sendMessage } from '../utils/api'
 import { formatTime, formatWeekday } from '../utils/format'
+
+const router = useRouter()
 
 const loading = ref(false)
 const batchLoading = ref(false)
@@ -168,15 +275,16 @@ const selectedLabId = ref(null)
 const messageForm = reactive({
   content: ''
 })
+const scheduleResultVisible = ref(false)
+const scheduleResult = ref(null)
 
 const loadData = async () => {
   loading.value = true
   
   try {
-    // 查询已通过但未排课的申请（status=1, is_scheduled=0）
-    const res = await getBookingList({ status: 1 })
-    // 过滤出未排课的
-    tableData.value = res.data.filter(item => item.is_scheduled === 0)
+    // 查询待排课的申请（status=0）
+    const res = await getBookingList({ status: 0 })
+    tableData.value = res.data
   } catch (error) {
     console.error('加载申请列表失败:', error)
     ElMessage.error('加载失败: ' + error.message)
@@ -340,36 +448,50 @@ const batchSchedule = async () => {
     
     let successCount = 0
     let failCount = 0
-    const failReasons = []
+    const successList = []
+    const failList = []
     
     for (const row of tableData.value) {
       try {
         const res = await autoSchedule({ bookingId: row.booking_id })
         if (res.success) {
           successCount++
+          successList.push({
+            bookingNo: row.booking_no,
+            courseName: row.course_name,
+            labName: res.data.labName
+          })
         } else {
           failCount++
-          failReasons.push(`${row.booking_no}: ${res.message}`)
+          failList.push({
+            bookingNo: row.booking_no,
+            courseName: row.course_name,
+            reason: res.message
+          })
         }
       } catch (error) {
         failCount++
-        failReasons.push(`${row.booking_no}: ${error.message}`)
+        failList.push({
+          bookingNo: row.booking_no,
+          courseName: row.course_name,
+          reason: error.message
+        })
       }
     }
     
-    // 显示结果
-    ElNotification({
-      title: '批量排课完成',
-      dangerouslyUseHTMLString: true,
-      message: `
-        <div>成功：${successCount} 条</div>
-        <div>失败：${failCount} 条</div>
-        ${failReasons.length > 0 ? '<div style="margin-top: 8px; font-size: 12px; color: #909399;">失败原因：<br/>' + failReasons.slice(0, 3).join('<br/>') + (failReasons.length > 3 ? '<br/>...' : '') + '</div>' : ''}
-      `,
-      type: successCount > 0 ? 'success' : 'warning',
-      duration: 8000
-    })
+    // 保存结果数据
+    scheduleResult.value = {
+      successCount,
+      failCount,
+      total: tableData.value.length,
+      successList,
+      failList
+    }
     
+    // 显示结果详情对话框
+    scheduleResultVisible.value = true
+    
+    // 刷新数据
     loadData()
   } catch (error) {
     if (error !== 'cancel') {
@@ -379,6 +501,11 @@ const batchSchedule = async () => {
   } finally {
     batchLoading.value = false
   }
+}
+
+const goToScheduleLog = () => {
+  scheduleResultVisible.value = false
+  router.push('/schedule-log')
 }
 
 onMounted(() => {
@@ -410,6 +537,75 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   font-weight: bold;
+}
+
+/* 排课结果统计卡片样式 */
+.stat-card {
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #909399;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.success-card .stat-icon {
+  background-color: #f0f9ff;
+  color: #67c23a;
+}
+
+.success-card .stat-value {
+  color: #67c23a;
+}
+
+.fail-card .stat-icon {
+  background-color: #fef0f0;
+  color: #f56c6c;
+}
+
+.fail-card .stat-value {
+  color: #f56c6c;
+}
+
+.total-card .stat-icon {
+  background-color: #f4f4f5;
+  color: #409eff;
+}
+
+.total-card .stat-value {
+  color: #409eff;
 }
 </style>
 

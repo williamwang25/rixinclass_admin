@@ -212,3 +212,27 @@ export async function manageUser(params) {
   return await callFunction('manageUser', params)
 }
 
+/**
+ * 获取排课日志列表
+ * @param {Object} params - 查询参数
+ * @param {string} params.actionType - 操作类型筛选（可选）
+ * @param {string} params.actionResult - 操作结果筛选（可选）
+ * @param {number} params.adminUserId - 管理员筛选（可选）
+ * @param {string} params.startDate - 开始日期（可选）
+ * @param {string} params.endDate - 结束日期（可选）
+ * @param {number} params.pageSize - 每页数量
+ * @param {number} params.pageNum - 页码
+ * @returns {Promise<Object>} 排课日志列表
+ */
+export async function getScheduleLog(params = {}) {
+  return callFunction('getScheduleLog', params)
+}
+
+/**
+ * 获取排课草稿（待审核的排课结果）
+ * @param {Object} params - 查询参数
+ * @returns {Promise<Object>} 排课草稿列表
+ */
+export async function getScheduleDraft(params) {
+  return callFunction('getScheduleDraft', params)
+}

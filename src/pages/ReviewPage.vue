@@ -1,12 +1,12 @@
 <template>
   <div class="page-container">
-    <el-page-header title="返回" content="申请审核" />
+    <el-page-header title="返回" content="排课方案审核" />
     
     <el-card shadow="never" class="toolbar-card">
       <div class="toolbar">
         <el-select v-model="statusFilter" placeholder="状态筛选" @change="loadData" clearable style="width: 150px">
           <el-option label="全部" :value="null" />
-          <el-option label="待审核" :value="0" />
+          <el-option label="待审核" :value="3" />
           <el-option label="已通过" :value="1" />
           <el-option label="已拒绝" :value="2" />
         </el-select>
@@ -49,8 +49,8 @@
         <el-table-column label="操作" width="260" fixed="right" align="center">
           <template #default="{ row }">
             <el-button type="primary" size="small" round @click="showDetail(row)">详情</el-button>
-            <el-button v-if="row.status === 0" link type="success" size="small" @click="handleApprove(row)">通过</el-button>
-            <el-button v-if="row.status === 0" link type="danger" size="small" @click="handleReject(row)">拒绝</el-button>
+            <el-button v-if="row.status === 3" link type="success" size="small" @click="handleApprove(row)">通过</el-button>
+            <el-button v-if="row.status === 3" link type="danger" size="small" @click="handleReject(row)">拒绝</el-button>
             <el-button link type="info" size="small" @click="handleSendMessage(row)">
               <el-icon><ChatDotRound /></el-icon>
             </el-button>
@@ -90,12 +90,83 @@
           <template #default="{ row }">{{ formatWeekday(row.weekday) }}</template>
         </el-table-column>
         <el-table-column label="周次范围" align="center">
-          <template #default="{ row }">第 {{ row.weekStart }}-{{ row.weekEnd }} 周</template>
+          <template #default="{ row }">第 {{ row.week_start }}-{{ row.week_end }} 周</template>
         </el-table-column>
         <el-table-column label="节次范围" align="center">
-          <template #default="{ row }">第 {{ row.periodStart }}-{{ row.periodEnd }} 节</template>
+          <template #default="{ row }">第 {{ row.period_start }}-{{ row.period_end }} 节</template>
         </el-table-column>
       </el-table>
+      
+      <!-- 如果是已排课待审核状态，显示排课结果 -->
+      <div v-if="currentRow?.status === 3">
+        <el-divider>排课结果</el-divider>
+        <div v-loading="scheduleLoading">
+          <el-alert 
+            v-if="scheduleResults.length === 0 && !scheduleLoading" 
+            type="warning" 
+            :closable="false"
+            style="margin-bottom: 16px"
+          >
+            未找到排课结果
+          </el-alert>
+          
+          <!-- 实验室信息卡片 -->
+          <el-card v-if="scheduleResults.length > 0" shadow="hover" style="margin-bottom: 16px">
+            <template #header>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-weight: bold;">
+                  <el-icon style="margin-right: 4px;"><OfficeBuilding /></el-icon>
+                  分配实验室
+                </span>
+                <el-tag :type="scheduleResults[0].is_manual ? 'warning' : 'success'" size="small">
+                  {{ scheduleResults[0].is_manual ? '手动排课' : '自动排课' }}
+                </el-tag>
+              </div>
+            </template>
+            <el-descriptions :column="2" border>
+              <el-descriptions-item label="实验室">
+                <el-text type="primary" size="large" style="font-weight: bold;">
+                  {{ scheduleResults[0].building }} {{ scheduleResults[0].lab_room }}
+                </el-text>
+              </el-descriptions-item>
+              <el-descriptions-item label="实验室ID">
+                {{ scheduleResults[0].lab_id }}
+              </el-descriptions-item>
+              <el-descriptions-item label="实验室名称" :span="2">
+                {{ scheduleResults[0].lab_name }}
+              </el-descriptions-item>
+            </el-descriptions>
+          </el-card>
+          
+          <!-- 时间段列表 -->
+          <el-table 
+            v-if="scheduleResults.length > 0"
+            :data="scheduleResults" 
+            border 
+            size="small"
+          >
+            <el-table-column label="星期" align="center" width="100">
+              <template #default="{ row }">
+                <el-tag type="info">{{ formatWeekday(row.weekday) }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="周次范围" align="center" width="120">
+              <template #default="{ row }">第 {{ row.week_start }}-{{ row.week_end }} 周</template>
+            </el-table-column>
+            <el-table-column label="节次范围" align="center" width="120">
+              <template #default="{ row }">第 {{ row.period_start }}-{{ row.period_end }} 节</template>
+            </el-table-column>
+            <el-table-column label="课程信息" min-width="200">
+              <template #default="{ row }">
+                <div>{{ row.course_name }}</div>
+                <div style="font-size: 12px; color: #909399;">
+                  {{ row.teacher_name }} | {{ row.student_count }}人
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
     </el-dialog>
     
     <!-- 拒绝对话框 -->
@@ -142,17 +213,19 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
-import { Refresh, Checked, ChatDotRound } from '@element-plus/icons-vue'
-import { getBookingList, reviewBooking, sendMessage } from '../utils/api'
+import { Refresh, Checked, ChatDotRound, OfficeBuilding } from '@element-plus/icons-vue'
+import { getBookingList, reviewBooking, sendMessage, getScheduleDraft } from '../utils/api'
 import { formatTime, formatStatus, formatWeekday } from '../utils/format'
 
 const loading = ref(false)
 const submitting = ref(false)
 const batchLoading = ref(false)
 const messageSending = ref(false)
-const statusFilter = ref(null)
+const scheduleLoading = ref(false)
+const statusFilter = ref(3)  // 默认显示已排课待审核的申请
 const tableData = ref([])
 const selectedRows = ref([])
+const scheduleResults = ref([])
 const detailVisible = ref(false)
 const rejectVisible = ref(false)
 const messageVisible = ref(false)
@@ -188,13 +261,32 @@ const handleSelectionChange = (selection) => {
 }
 
 const checkSelectable = (row) => {
-  // 只有待审核的申请可以被选中
-  return row.status === 0
+  // 只有已排课待审核的申请可以被选中
+  return row.status === 3
 }
 
-const showDetail = (row) => {
+const loadScheduleResults = async (bookingId) => {
+  scheduleLoading.value = true
+  try {
+    const res = await getScheduleDraft({ bookingId })
+    scheduleResults.value = res.data || []
+  } catch (error) {
+    console.error('加载排课草稿失败:', error)
+    ElMessage.error('加载排课草稿失败: ' + error.message)
+    scheduleResults.value = []
+  } finally {
+    scheduleLoading.value = false
+  }
+}
+
+const showDetail = async (row) => {
   currentRow.value = row
   detailVisible.value = true
+  
+  // 如果是已排课待审核状态，加载排课结果
+  if (row.status === 3) {
+    await loadScheduleResults(row.booking_id)
+  }
 }
 
 const handleApprove = async (row) => {

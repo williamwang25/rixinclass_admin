@@ -30,15 +30,16 @@ export function formatTime(time, format = 'YYYY-MM-DD HH:mm:ss') {
 
 /**
  * 格式化申请状态
- * @param {number} status - 状态码（0=待审核，1=已通过，2=已拒绝）
+ * @param {number} status - 状态码（0=待排课，1=已通过，2=已拒绝，3=已排课待审核，4=排课失败）
  * @returns {Object} 状态信息 { text, type, class }
  */
 export function formatStatus(status) {
   const statusMap = {
-    0: { text: '待审核', type: 'warning', class: 'status-pending' },
+    0: { text: '待排课', type: 'warning', class: 'status-pending' },
     1: { text: '已通过', type: 'success', class: 'status-approved' },
     2: { text: '已拒绝', type: 'danger', class: 'status-rejected' },
-    3: { text: '已取消', type: 'info', class: 'status-cancelled' }
+    3: { text: '待审核', type: 'primary', class: 'status-scheduled' },
+    4: { text: '排课失败', type: 'danger', class: 'status-failed' }
   }
   
   return statusMap[status] || { text: '未知', type: 'info', class: '' }

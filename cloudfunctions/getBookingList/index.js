@@ -27,6 +27,17 @@ exports.main = async (event, context) => {
       .limit(pageSize)
       .get()
     
+    // 为每个申请查询时间段
+    for (const booking of data) {
+      const { data: timeSlots } = await db.collection('booking_time_slots')
+        .where({ 
+          booking_id: booking.booking_id,
+          is_deleted: 0
+        })
+        .get()
+      booking.time_slots = timeSlots
+    }
+    
     // 查询总数
     const { total } = await db.collection('booking')
       .where(where)

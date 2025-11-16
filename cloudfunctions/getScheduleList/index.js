@@ -9,9 +9,9 @@ const db = cloud.database()
 
 exports.main = async (event, context) => {
   try {
-    const { academicYear, semester } = event
+    const { academicYear, semester, bookingId, status } = event
     
-    console.log('[getScheduleList] 查询参数:', { academicYear, semester })
+    console.log('[getScheduleList] 查询参数:', { academicYear, semester, bookingId, status })
     
     // 构建查询条件
     const where = { is_deleted: 0 }
@@ -20,6 +20,12 @@ exports.main = async (event, context) => {
     }
     if (semester) {
       where.semester = semester
+    }
+    if (bookingId) {
+      where.booking_id = bookingId
+    }
+    if (status !== undefined && status !== null) {
+      where.status = status
     }
     
     // 查询排课结果

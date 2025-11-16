@@ -19,19 +19,25 @@
             <template #title>数据看板</template>
           </el-menu-item>
           
-          <el-menu-item index="/review">
-            <el-icon><DocumentChecked /></el-icon>
-            <template #title>申请审核</template>
-          </el-menu-item>
           
           <el-menu-item index="/schedule">
             <el-icon><Calendar /></el-icon>
             <template #title>排课管理</template>
           </el-menu-item>
+
+          <el-menu-item index="/review">
+            <el-icon><DocumentChecked /></el-icon>
+            <template #title>排课审核</template>
+          </el-menu-item>
           
           <el-menu-item index="/result">
             <el-icon><List /></el-icon>
             <template #title>排课结果</template>
+          </el-menu-item>
+          
+          <el-menu-item index="/schedule-log">
+            <el-icon><Document /></el-icon>
+            <template #title>排课日志</template>
           </el-menu-item>
           
           <el-menu-item index="/labs">
@@ -102,7 +108,8 @@ import {
   UserFilled,
   SwitchButton,
   Expand,
-  Fold
+  Fold,
+  Document
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

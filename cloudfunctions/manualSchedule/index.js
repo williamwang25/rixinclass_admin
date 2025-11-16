@@ -45,6 +45,31 @@ exports.main = async (event, context) => {
     
     // 3. 检查容量
     if (lab.capacity < booking.student_count) {
+      // 记录手动排课失败日志（容量不足）
+      await cloud.callFunction({
+        name: 'createScheduleLog',
+        data: {
+          bookingId: bookingId,
+          bookingNo: booking.booking_no,
+          adminUserId: 1, // TODO: 从context获取管理员ID
+          adminName: '管理员手动排课',
+          actionType: 'manual_schedule',
+          actionResult: 'failure',
+          labId: lab.lab_id,
+          labName: `${lab.building} ${lab.lab_room}`,
+          building: lab.building,
+          labRoom: lab.lab_room,
+          studentCount: booking.student_count,
+          labCapacity: lab.capacity,
+          softwareRequirements: booking.software_requirements,
+          failureReason: `实验室容量不足：实验室容量${lab.capacity}人，申请需要${booking.student_count}人`,
+          courseName: booking.course_name,
+          teacherName: booking.teacher_name,
+          academicYear: booking.academic_year,
+          semester: booking.semester
+        }
+      })
+      
       return {
         success: false,
         message: `实验室容量不足：实验室容量${lab.capacity}人，申请需要${booking.student_count}人`
@@ -75,6 +100,32 @@ exports.main = async (event, context) => {
         .get()
       
       if (conflicts.length > 0) {
+        // 记录手动排课失败日志（时间冲突）
+        await cloud.callFunction({
+          name: 'createScheduleLog',
+          data: {
+            bookingId: bookingId,
+            bookingNo: booking.booking_no,
+            adminUserId: 1, // TODO: 从context获取管理员ID
+            adminName: '管理员手动排课',
+            actionType: 'manual_schedule',
+            actionResult: 'failure',
+            labId: lab.lab_id,
+            labName: `${lab.building} ${lab.lab_room}`,
+            building: lab.building,
+            labRoom: lab.lab_room,
+            studentCount: booking.student_count,
+            labCapacity: lab.capacity,
+            softwareRequirements: booking.software_requirements,
+            failureReason: `时间段冲突：${slot.weekday === 1 ? '周一' : '周' + ['二','三','四','五','六','日'][slot.weekday-2]} 第${slot.week_start}-${slot.week_end}周 第${slot.period_start}-${slot.period_end}节 已被占用`,
+            timeSlots: timeSlots,
+            courseName: booking.course_name,
+            teacherName: booking.teacher_name,
+            academicYear: booking.academic_year,
+            semester: booking.semester
+          }
+        })
+        
         return {
           success: false,
           message: `时间段冲突：${slot.weekday === 1 ? '周一' : '周' + ['二','三','四','五','六','日'][slot.weekday-2]} 第${slot.week_start}-${slot.week_end}周 第${slot.period_start}-${slot.period_end}节 已被占用`
@@ -156,6 +207,33 @@ exports.main = async (event, context) => {
     })
     
     console.log('[manualSchedule] 手动排课成功，已发送通知')
+    
+    // 记录手动排课成功日志
+    await cloud.callFunction({
+      name: 'createScheduleLog',
+      data: {
+        bookingId: bookingId,
+        bookingNo: booking.booking_no,
+        adminUserId: 1, // TODO: 从context获取管理员ID
+        adminName: '管理员手动排课',
+        actionType: 'manual_schedule',
+        actionResult: 'success',
+        labId: lab.lab_id,
+        labName: `${lab.building} ${lab.lab_room}`,
+        building: lab.building,
+        labRoom: lab.lab_room,
+        studentCount: booking.student_count,
+        labCapacity: lab.capacity,
+        softwareRequirements: booking.software_requirements,
+        matchedSoftware: lab.software_env,
+        matchReason: `管理员手动选择，实验室容量充足(${lab.capacity}>=${booking.student_count})`,
+        timeSlots: timeSlots,
+        courseName: booking.course_name,
+        teacherName: booking.teacher_name,
+        academicYear: booking.academic_year,
+        semester: booking.semester
+      }
+    })
     
     return {
       success: true,
