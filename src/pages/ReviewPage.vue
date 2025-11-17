@@ -34,6 +34,22 @@
         <el-table-column prop="teacher_name" label="教师姓名" width="100" />
         <el-table-column prop="course_name" label="课程名称" min-width="150" />
         <el-table-column prop="student_count" label="学生人数" width="100" align="center" />
+        <el-table-column label="实验室" min-width="150">
+          <template #default="{ row }">
+            <div v-if="row.lab_info && row.lab_info.length > 0">
+              <el-tag 
+                v-for="(lab, index) in row.lab_info" 
+                :key="index"
+                type="success"
+                size="small"
+                style="margin: 2px 4px 2px 0"
+              >
+                {{ lab.building }} {{ lab.lab_room }}
+              </el-tag>
+            </div>
+            <span v-else style="color: #909399">未排课</span>
+          </template>
+        </el-table-column>
         <el-table-column label="申请时间" width="180">
           <template #default="{ row }">
             {{ formatTime(row.create_time, 'YYYY-MM-DD HH:mm') }}
@@ -247,7 +263,35 @@ const loadData = async () => {
     }
     
     const res = await getBookingList(params)
-    tableData.value = res.data
+    const bookings = res.data || []
+    
+    // 为每个申请加载排课草稿信息（实验室信息）
+    for (const booking of bookings) {
+      try {
+        const draftRes = await getScheduleDraft({ bookingId: booking.booking_id })
+        if (draftRes.success && draftRes.data && draftRes.data.length > 0) {
+          // 提取实验室信息
+          const labInfo = draftRes.data.map(draft => ({
+            lab_id: draft.lab_id,
+            lab_name: draft.lab_name,
+            building: draft.building,
+            lab_room: draft.lab_room
+          }))
+          // 去重（如果同一个实验室有多个时间段）
+          const uniqueLabs = Array.from(
+            new Map(labInfo.map(lab => [lab.lab_id, lab])).values()
+          )
+          booking.lab_info = uniqueLabs
+        } else {
+          booking.lab_info = []
+        }
+      } catch (error) {
+        console.error(`加载申请 ${booking.booking_id} 的排课信息失败:`, error)
+        booking.lab_info = []
+      }
+    }
+    
+    tableData.value = bookings
   } catch (error) {
     console.error('加载申请列表失败:', error)
     ElMessage.error('加载失败: ' + error.message)

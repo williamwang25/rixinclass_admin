@@ -32,7 +32,7 @@ exports.main = async (event, context) => {
       approvedResult,
       rejectedResult
     ] = await Promise.all([
-      // 待审核数量
+      // 待审核数量（待排课）
       db.collection('booking').where({ status: 0, is_deleted: 0 }).count(),
       // 本学期申请总数
       db.collection('booking').where({ 
@@ -40,8 +40,11 @@ exports.main = async (event, context) => {
         semester: currentSemester, 
         is_deleted: 0 
       }).count(),
-      // 已排课数量
-      db.collection('booking').where({ status: 1, is_scheduled: 1, is_deleted: 0 }).count(),
+      // 已排课数量（已排课待审核 + 已通过）
+      db.collection('booking').where({ 
+        status: _.in([3, 1]), 
+        is_deleted: 0 
+      }).count(),
       // 已通过数量
       db.collection('booking').where({ status: 1, is_deleted: 0 }).count(),
       // 已拒绝数量

@@ -32,10 +32,10 @@ function validateRequiredParams(params) {
   }
   
   // 验证枚举值
-  if (!['auto_schedule', 'manual_schedule'].includes(actionType)) {
+  if (!['auto_schedule', 'manual_schedule', 'history_schedule'].includes(actionType)) {
     return {
       valid: false,
-      message: '操作类型必须为 auto_schedule 或 manual_schedule'
+      message: '操作类型必须为 auto_schedule、manual_schedule 或 history_schedule'
     }
   }
   

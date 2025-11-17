@@ -62,8 +62,10 @@
         </el-table-column>
         <el-table-column label="操作类型" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="row.action_type === 'auto_schedule' ? 'primary' : 'warning'" size="small">
-              {{ row.action_type === 'auto_schedule' ? '自动排课' : '手动排课' }}
+            <el-tag 
+              :type="row.action_type === 'auto_schedule' ? 'primary' : (row.action_type === 'history_schedule' ? 'success' : 'warning')" 
+              size="small">
+              {{ row.action_type === 'auto_schedule' ? '自动排课' : (row.action_type === 'history_schedule' ? '历史排课' : '手动排课') }}
             </el-tag>
           </template>
         </el-table-column>
@@ -115,8 +117,10 @@
           <el-descriptions-item label="申请编号">{{ currentRow.booking_no }}</el-descriptions-item>
           <el-descriptions-item label="操作时间">{{ formatTime(currentRow.create_time) }}</el-descriptions-item>
           <el-descriptions-item label="操作类型">
-            <el-tag :type="currentRow.action_type === 'auto_schedule' ? 'primary' : 'warning'" size="small">
-              {{ currentRow.action_type === 'auto_schedule' ? '自动排课' : '手动排课' }}
+            <el-tag 
+              :type="currentRow.action_type === 'auto_schedule' ? 'primary' : (currentRow.action_type === 'history_schedule' ? 'success' : 'warning')" 
+              size="small">
+              {{ currentRow.action_type === 'auto_schedule' ? '自动排课' : (currentRow.action_type === 'history_schedule' ? '历史排课' : '手动排课') }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="操作结果">

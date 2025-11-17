@@ -1,0 +1,9 @@
+{
+  "name": "historySchedule",
+  "version": "1.0.0",
+  "description": "基于历史排课记录进行自动排课",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

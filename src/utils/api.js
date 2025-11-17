@@ -102,6 +102,16 @@ export async function manualSchedule(params) {
 }
 
 /**
+ * 历史排课（基于上一学年相同学期的历史记录）
+ * @param {Object} params - 排课参数
+ * @param {number} params.bookingId - 申请ID
+ * @returns {Promise<Object>} 排课结果
+ */
+export async function historySchedule(params) {
+  return await callFunction('historySchedule', params)
+}
+
+/**
  * 获取实验室列表
  * @param {Object} params - 查询参数
  * @param {number} params.status - 状态筛选（可选）
