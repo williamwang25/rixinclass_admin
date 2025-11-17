@@ -236,3 +236,21 @@ export async function getScheduleLog(params = {}) {
 export async function getScheduleDraft(params) {
   return callFunction('getScheduleDraft', params)
 }
+
+/**
+ * 获取系统配置
+ * @param {Object} params - 查询参数
+ * @returns {Promise<Object>} 系统配置列表
+ */
+export async function getSysConfig(params) {
+  return callFunction('getSysConfig', params)
+}
+
+/**
+ * 管理系统配置
+ * @param {Object} params - 操作参数
+ * @returns {Promise<Object>} 操作结果
+ */
+export async function manageSysConfig(params) {
+  return callFunction('manageSysConfig', params)
+}

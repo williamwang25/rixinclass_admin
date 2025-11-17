@@ -27,6 +27,8 @@ exports.main = async (event, context) => {
         return await updateNotice(noticeData)
       case 'delete':
         return await deleteNotice(noticeData)
+      case 'publish':
+        return await publishNotice(noticeData)
       default:
         return {
           success: false,
@@ -42,9 +44,9 @@ exports.main = async (event, context) => {
   }
 }
 
-// 创建公告
+// 创建公告（草稿）
 async function createNotice(data) {
-  const { title, content, noticeType, priority, targetUserId } = data
+  const { title, content, noticeType, priority, targetUserId, status } = data
   
   if (!title || !content) {
     return {
@@ -54,6 +56,7 @@ async function createNotice(data) {
   }
   
   const noticeId = Date.now()
+  const noticeStatus = status || 'draft'  // 默认为草稿
   
   await db.collection('notice').add({
     data: {
@@ -65,6 +68,9 @@ async function createNotice(data) {
       target_user_id: targetUserId || null,
       booking_id: null,
       sender_id: null,
+      status: noticeStatus,  // 'draft' 草稿 | 'published' 已发布
+      publish_time: noticeStatus === 'published' ? new Date() : null,
+      last_modified_time: new Date(),  // 最后修改时间
       is_read: 0,
       is_deleted: 0,
       create_time: new Date(),
@@ -74,17 +80,18 @@ async function createNotice(data) {
     }
   })
   
-  console.log('[createNotice] 创建成功, noticeId:', noticeId)
+  console.log('[createNotice] 创建成功, noticeId:', noticeId, 'status:', noticeStatus)
   
   return {
     success: true,
-    message: '公告创建成功'
+    message: noticeStatus === 'draft' ? '草稿保存成功' : '公告发布成功',
+    data: { noticeId }
   }
 }
 
-// 更新公告
+// 更新公告（保持草稿状态）
 async function updateNotice(data) {
-  const { noticeId, title, content, noticeType, priority, targetUserId } = data
+  const { noticeId, title, content, noticeType, priority, targetUserId, status } = data
   
   if (!noticeId) {
     return {
@@ -94,7 +101,8 @@ async function updateNotice(data) {
   }
   
   const updateData = {
-    update_time: new Date()
+    update_time: new Date(),
+    last_modified_time: new Date()  // 更新最后修改时间
   }
   
   if (title !== undefined) updateData.title = title
@@ -102,6 +110,7 @@ async function updateNotice(data) {
   if (noticeType !== undefined) updateData.notice_type = noticeType
   if (priority !== undefined) updateData.priority = priority
   if (targetUserId !== undefined) updateData.target_user_id = targetUserId
+  if (status !== undefined) updateData.status = status
   
   const result = await db.collection('notice')
     .where({ notice_id: noticeId })
@@ -119,6 +128,44 @@ async function updateNotice(data) {
   return {
     success: true,
     message: '公告更新成功'
+  }
+}
+
+// 发布公告（从草稿发布或重新发布）
+async function publishNotice(data) {
+  const { noticeId } = data
+  
+  if (!noticeId) {
+    return {
+      success: false,
+      message: '缺少公告ID'
+    }
+  }
+  
+  const result = await db.collection('notice')
+    .where({ notice_id: noticeId })
+    .update({
+      data: {
+        status: 'published',
+        publish_time: new Date(),  // 更新发布时间
+        last_modified_time: new Date(),  // 更新最后修改时间
+        update_time: new Date()
+      }
+    })
+  
+  if (result.stats.updated === 0) {
+    return {
+      success: false,
+      message: '公告不存在'
+    }
+  }
+  
+  console.log('[publishNotice] 发布成功, noticeId:', noticeId)
+  
+  return {
+    success: true,
+    message: '公告发布成功',
+    data: { noticeId, publishTime: new Date() }
   }
 }
 

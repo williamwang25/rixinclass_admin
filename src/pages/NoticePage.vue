@@ -33,6 +33,13 @@
       <el-table :data="noticeData" :loading="noticeLoading" stripe border>
         <el-table-column prop="title" label="标题" min-width="200" />
         <el-table-column prop="notice_type" label="类型" width="120" />
+        <el-table-column label="状态" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 'published' ? 'success' : 'info'">
+              {{ row.status === 'published' ? '已发布' : '草稿' }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="优先级" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="row.priority === 1 ? 'danger' : 'info'">
@@ -42,13 +49,15 @@
         </el-table-column>
         <el-table-column label="发布时间" width="180">
           <template #default="{ row }">
-            {{ formatTime(row.create_time, 'YYYY-MM-DD HH:mm') }}
+            {{ row.publish_time ? formatTime(row.publish_time, 'YYYY-MM-DD HH:mm') : '-' }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="220" fixed="right" align="center">
+        <el-table-column label="操作" width="300" fixed="right" align="center">
           <template #default="{ row }">
             <el-button type="primary" size="small" round @click="handleViewNotice(row)">查看</el-button>
             <el-button type="warning" size="small" round @click="handleEditNotice(row)">编辑</el-button>
+            <el-button v-if="row.status === 'draft'" type="success" size="small" round @click="handlePublishNotice(row)">发布</el-button>
+            <el-button v-else type="success" size="small" round @click="handlePublishNotice(row)">重新发布</el-button>
             <el-button type="danger" size="small" round @click="handleDeleteNotice(row)">删除</el-button>
           </template>
         </el-table-column>
@@ -81,7 +90,8 @@
       </el-form>
       <template #footer>
         <el-button @click="noticeFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitNotice" :loading="submitting">确定</el-button>
+        <el-button type="info" @click="submitNotice('draft')" :loading="submitting">保存草稿</el-button>
+        <el-button type="primary" @click="submitNotice('published')" :loading="submitting">{{ isEditNotice ? '保存并发布' : '发布' }}</el-button>
       </template>
     </el-dialog>
     
@@ -142,7 +152,7 @@ const noticeRules = {
 const loadNotices = async () => {
   noticeLoading.value = true
   try {
-    const res = await getNoticeList()
+    const res = await getNoticeList({ includeStatus: true })  // 管理端查询所有状态
     noticeData.value = res.data
   } catch (error) {
     console.error('加载公告失败:', error)
@@ -182,7 +192,7 @@ const handleViewNotice = (row) => {
   noticeDetailVisible.value = true
 }
 
-const submitNotice = async () => {
+const submitNotice = async (status) => {
   try {
     await noticeFormRef.value.validate()
     submitting.value = true
@@ -195,11 +205,13 @@ const submitNotice = async () => {
         title: noticeForm.title,
         content: noticeForm.content,
         noticeType: noticeForm.noticeType,
-        priority: noticeForm.priority
+        priority: noticeForm.priority,
+        status: status  // 'draft' 或 'published'
       }
     })
     
-    ElMessage.success(isEditNotice.value ? '更新成功' : '发布成功')
+    const message = status === 'draft' ? '草稿保存成功' : (isEditNotice.value ? '保存并发布成功' : '发布成功')
+    ElMessage.success(message)
     noticeFormVisible.value = false
     loadNotices()
   } catch (error) {
@@ -209,6 +221,33 @@ const submitNotice = async () => {
     }
   } finally {
     submitting.value = false
+  }
+}
+
+const handlePublishNotice = async (row) => {
+  try {
+    await ElMessageBox.confirm(
+      row.status === 'draft' ? `确定发布公告"${row.title}"吗？` : `确定重新发布公告"${row.title}"吗？发布后小程序端会弹窗提醒。`,
+      '确认发布',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    await manageNotice({
+      action: 'publish',
+      data: { noticeId: row.notice_id }
+    })
+    
+    ElMessage.success('发布成功')
+    loadNotices()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('发布失败:', error)
+      ElMessage.error('发布失败: ' + error.message)
+    }
   }
 }
 

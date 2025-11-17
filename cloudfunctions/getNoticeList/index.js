@@ -9,9 +9,9 @@ const db = cloud.database()
 
 exports.main = async (event, context) => {
   try {
-    const { noticeType, pageSize = 100 } = event
+    const { noticeType, pageSize = 100, includeStatus } = event
     
-    console.log('[getNoticeList] 查询参数:', { noticeType, pageSize })
+    console.log('[getNoticeList] 查询参数:', { noticeType, pageSize, includeStatus })
     
     // 构建查询条件 - 只查询全局公告（target_user_id 为 null）
     const where = { 
@@ -22,6 +22,15 @@ exports.main = async (event, context) => {
     // 如果指定了公告类型
     if (noticeType) {
       where.notice_type = noticeType
+    }
+    
+    // 如果指定了状态（用于管理端查询所有状态，小程序端只查已发布）
+    if (includeStatus) {
+      // 管理端：查询所有状态（草稿+已发布）
+      // 不添加status条件
+    } else {
+      // 小程序端：只查询已发布的公告
+      where.status = 'published'
     }
     
     // 查询公告列表
